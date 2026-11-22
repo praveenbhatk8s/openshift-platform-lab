@@ -1,0 +1,22 @@
+# Let the OpenShift router reach the app. On OVN-Kubernetes the ingress namespace carries the
+# label policy-group.network.openshift.io/ingress, so this keeps working even if the router
+# moves or the cluster uses host networking for it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-openshift-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app: rack-demo
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              policy-group.network.openshift.io/ingress: ""
+      ports:
+        - port: 8080
+          protocol: TCP
+        - port: 8443
+          protocol: TCP

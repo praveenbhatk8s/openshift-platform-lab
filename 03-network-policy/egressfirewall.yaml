@@ -1,0 +1,15 @@
+# OVN-Kubernetes EgressFirewall: controls traffic leaving the cluster, by DNS name or CIDR.
+# One per project, and it must be named "default". Rules are checked top to bottom; the first
+# match wins. Traffic to other pods and Services inside the cluster is not affected.
+apiVersion: k8s.ovn.org/v1
+kind: EgressFirewall
+metadata:
+  name: default
+spec:
+  egress:
+    - type: Allow
+      to:
+        dnsName: example.com
+    - type: Deny
+      to:
+        cidrSelector: 0.0.0.0/0

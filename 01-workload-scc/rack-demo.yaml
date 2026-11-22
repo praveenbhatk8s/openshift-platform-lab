@@ -1,0 +1,85 @@
+# The demo app, built inside the cluster (BuildConfig) into an ImageStream.
+#
+# The image.openshift.io/triggers annotation is an OpenShift feature: when a new build lands
+# in the ImageStreamTag, the Deployment rolls out automatically.
+#
+# No runAsUser is set on purpose. OpenShift's restricted-v2 SCC assigns a UID from the
+# project's range, and the app reports which one it got.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rack-demo
+  labels:
+    app: rack-demo
+  annotations:
+    image.openshift.io/triggers: >-
+      [{"from":{"kind":"ImageStreamTag","name":"rack-demo:latest"},
+        "fieldPath":"spec.template.spec.containers[?(@.name==\"app\")].image"}]
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rack-demo
+  template:
+    metadata:
+      labels:
+        app: rack-demo
+    spec:
+      containers:
+        - name: app
+          image: image-registry.openshift-image-registry.svc:5000/rack-demo/rack-demo:latest
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: https
+              containerPort: 8443
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/tls
+              readOnly: true
+      volumes:
+        # Filled in module 02 by the service CA. Optional, so the app starts without it.
+        - name: tls
+          secret:
+            secretName: rack-demo-tls
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rack-demo
+  labels:
+    app: rack-demo
+spec:
+  selector:
+    app: rack-demo
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+    - name: https
+      port: 8443
+      targetPort: https

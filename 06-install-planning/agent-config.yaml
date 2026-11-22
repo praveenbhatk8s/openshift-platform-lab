@@ -1,0 +1,98 @@
+# agent-config for rack01: which servers, their MAC addresses and static IPs.
+# The rendezvous host coordinates the install; it must be one of the control-plane nodes.
+# Network settings use NMState syntax.
+apiVersion: v1beta1
+kind: AgentConfig
+metadata:
+  name: rack01
+rendezvousIP: 10.20.0.11
+additionalNTPSources:
+  - 10.20.0.1
+hosts:
+  - hostname: master-0
+    role: master
+    rootDeviceHints:
+      deviceName: /dev/sda
+    interfaces:
+      - name: eno1
+        macAddress: 52:54:00:aa:bb:01
+    networkConfig:
+      interfaces:
+        - name: eno1
+          type: ethernet
+          state: up
+          mac-address: 52:54:00:aa:bb:01
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+              - ip: 10.20.0.11
+                prefix-length: 24
+      dns-resolver:
+        config:
+          server:
+            - 10.20.0.1
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 10.20.0.1
+            next-hop-interface: eno1
+            table-id: 254
+  - hostname: master-1
+    role: master
+    rootDeviceHints:
+      deviceName: /dev/sda
+    interfaces:
+      - name: eno1
+        macAddress: 52:54:00:aa:bb:02
+    networkConfig:
+      interfaces:
+        - name: eno1
+          type: ethernet
+          state: up
+          mac-address: 52:54:00:aa:bb:02
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+              - ip: 10.20.0.12
+                prefix-length: 24
+      dns-resolver:
+        config:
+          server:
+            - 10.20.0.1
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 10.20.0.1
+            next-hop-interface: eno1
+            table-id: 254
+  - hostname: master-2
+    role: master
+    rootDeviceHints:
+      deviceName: /dev/sda
+    interfaces:
+      - name: eno1
+        macAddress: 52:54:00:aa:bb:03
+    networkConfig:
+      interfaces:
+        - name: eno1
+          type: ethernet
+          state: up
+          mac-address: 52:54:00:aa:bb:03
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+              - ip: 10.20.0.13
+                prefix-length: 24
+      dns-resolver:
+        config:
+          server:
+            - 10.20.0.1
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 10.20.0.1
+            next-hop-interface: eno1
+            table-id: 254

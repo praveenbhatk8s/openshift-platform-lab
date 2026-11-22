@@ -1,0 +1,58 @@
+# Three ways the OpenShift router (HAProxy) can handle TLS for the same app.
+# Hostnames are generated from the apps domain: <route>-<project>.apps-crc.testing on CRC.
+
+# 1. Edge: the router terminates TLS with its own certificate and talks plain HTTP to the pod.
+#    Simplest. Traffic inside the cluster is unencrypted.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: rack-demo-edge
+  labels:
+    app: rack-demo
+spec:
+  to:
+    kind: Service
+    name: rack-demo
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+# 2. Re-encrypt: the router terminates the client's TLS, then opens a new TLS connection to the
+#    pod. With no destinationCACertificate set, the router trusts the cluster's service CA,
+#    which signed the pod's certificate (the serving-cert annotation in service-tls.sh).
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: rack-demo-reencrypt
+  labels:
+    app: rack-demo
+spec:
+  to:
+    kind: Service
+    name: rack-demo
+  port:
+    targetPort: https
+  tls:
+    termination: reencrypt
+    insecureEdgeTerminationPolicy: Redirect
+---
+# 3. Passthrough: the router does not decrypt anything. It routes on the TLS SNI hostname and
+#    the pod presents its own certificate to the client. Needed when the app must own TLS
+#    end to end, for example mutual TLS with devices.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: rack-demo-passthrough
+  labels:
+    app: rack-demo
+spec:
+  to:
+    kind: Service
+    name: rack-demo
+  port:
+    targetPort: https
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: Redirect

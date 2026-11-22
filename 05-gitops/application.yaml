@@ -1,0 +1,20 @@
+# Argo CD Application: keep the rack-web project in sync with the app/ folder of this repo.
+# Replace REPO_URL with your fork's URL before applying (the README's sed command does it).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rack-web
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: REPO_URL
+    targetRevision: main
+    path: 05-gitops/app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rack-web
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

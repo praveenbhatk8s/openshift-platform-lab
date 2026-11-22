@@ -1,0 +1,57 @@
+# install-config for a compact three-node cluster on bare metal, installed with the
+# agent-based installer. Fictional rack "rack01" at a customer site.
+#
+# render.sh fills in the pull secret and SSH key; never commit the rendered file.
+apiVersion: v1
+baseDomain: customer.example
+metadata:
+  name: rack01
+
+# Compact cluster: three control-plane nodes that also run workloads, no separate workers.
+controlPlane:
+  name: master
+  architecture: amd64
+  hyperthreading: Enabled
+  replicas: 3
+compute:
+  - name: worker
+    architecture: amd64
+    hyperthreading: Enabled
+    replicas: 0
+
+networking:
+  networkType: OVNKubernetes
+  # The rack's own network. Must not overlap the customer's ranges.
+  machineNetwork:
+    - cidr: 10.20.0.0/24
+  # Internal ranges used only inside the cluster. Also must not overlap anything the pods
+  # need to reach, such as the customer's systems.
+  clusterNetwork:
+    - cidr: 10.128.0.0/14
+      hostPrefix: 23
+  serviceNetwork:
+    - 172.30.0.0/16
+
+platform:
+  baremetal:
+    # Virtual IPs held by keepalived on the nodes. No external load balancer needed.
+    apiVIPs:
+      - 10.20.0.5
+    ingressVIPs:
+      - 10.20.0.6
+
+pullSecret: '__PULL_SECRET__'
+sshKey: '__SSH_KEY__'
+
+# For a disconnected site (module 07), add the local registry's CA and mirror settings:
+# additionalTrustBundle: |
+#   -----BEGIN CERTIFICATE-----
+#   ...
+#   -----END CERTIFICATE-----
+# imageDigestSources:
+#   - mirrors:
+#       - registry.rack01.customer.example:8443/openshift/release
+#     source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+#   - mirrors:
+#       - registry.rack01.customer.example:8443/openshift/release-images
+#     source: quay.io/openshift-release-dev/ocp-release

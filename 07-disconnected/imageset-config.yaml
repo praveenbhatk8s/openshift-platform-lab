@@ -1,0 +1,21 @@
+# What to copy into a site with no internet access (oc-mirror v2).
+# Keep the selection small: every extra version or operator adds gigabytes.
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v2alpha1
+mirror:
+  platform:
+    channels:
+      - name: stable-4.18          # change to the version you run
+        minVersion: 4.18.20        # pin a narrow range; widen it only to stage an upgrade
+        maxVersion: 4.18.20
+    graph: true                    # include update graph data for the local OSUS
+  operators:
+    - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
+      packages:
+        - name: openshift-gitops-operator
+          channels:
+            - name: latest
+        - name: redhat-oadp-operator
+  additionalImages:
+    - name: registry.access.redhat.com/ubi9/python-312:latest
+    - name: registry.access.redhat.com/ubi9/nginx-124:latest

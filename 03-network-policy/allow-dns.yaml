@@ -1,0 +1,20 @@
+# Allow name resolution. OpenShift's DNS pods listen on 5353, behind a Service on port 53.
+# Network policy is checked after the Service address is translated, so the rule must name
+# 5353. Allowing only 53 is a classic mistake that breaks DNS on OpenShift.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+spec:
+  podSelector: {}
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-dns
+      ports:
+        - port: 5353
+          protocol: UDP
+        - port: 5353
+          protocol: TCP

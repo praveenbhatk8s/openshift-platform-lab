@@ -1,0 +1,24 @@
+# Point control-plane nodes at a site NTP server. Applying this reboots each node in the pool.
+# Content is base64 of:
+#   server 10.20.0.1 iburst
+#   driftfile /var/lib/chrony/drift
+#   makestep 1.0 3
+#   rtcsync
+#   logdir /var/log/chrony
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  name: 99-master-chrony
+  labels:
+    machineconfiguration.openshift.io/role: master
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+        - path: /etc/chrony.conf
+          mode: 0644
+          overwrite: true
+          contents:
+            source: data:text/plain;charset=utf-8;base64,c2VydmVyIDEwLjIwLjAuMSBpYnVyc3QKZHJpZnRmaWxlIC92YXIvbGliL2Nocm9ueS9kcmlmdAptYWtlc3RlcCAxLjAgMwpydGNzeW5jCmxvZ2RpciAvdmFyL2xvZy9jaHJvbnkK

@@ -1,0 +1,27 @@
+# Red Hat's UBI nginx image: listens on 8080, writes only to group-writable paths,
+# and runs under any UID OpenShift assigns. Same web server, built for the platform.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-ubi
+  labels:
+    app: nginx-ubi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-ubi
+  template:
+    metadata:
+      labels:
+        app: nginx-ubi
+    spec:
+      containers:
+        - name: nginx
+          image: registry.access.redhat.com/ubi9/nginx-124:latest
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
