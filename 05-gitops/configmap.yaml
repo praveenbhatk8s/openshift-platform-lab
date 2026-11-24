@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rack-web-content
+data:
+  index.html: |
+    <html><body>
+    <h1>rack-web</h1>
+    <p>Deployed by OpenShift GitOps from Git.</p>
+    </body></html>
