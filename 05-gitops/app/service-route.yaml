@@ -11,19 +11,3 @@ spec:
     - name: http
       port: 8080
       targetPort: http
----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: rack-web
-  labels:
-    app: rack-web
-spec:
-  to:
-    kind: Service
-    name: rack-web
-  port:
-    targetPort: http
-  tls:
-    termination: edge
-    insecureEdgeTerminationPolicy: Redirect
