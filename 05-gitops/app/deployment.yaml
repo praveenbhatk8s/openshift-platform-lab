@@ -41,7 +41,7 @@ spec:
           volumeMounts:
             - name: content
               mountPath: /opt/app-root/src
-       volumes:
+      volumes:
         - name: content
           configMap:
-            name: rack-web-content   
+            name: rack-web-content
